@@ -1,41 +1,58 @@
 require('dotenv').config();
 const express = require('express');
-const http = require('http');
 const { WebSocketServer } = require('ws');
 const { createAISClient } = require('./aisClient');
+const { getSchedules } = require('./maerskClient');
 
 const app = express();
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
-
 const PORT = process.env.PORT || 3001;
 
-// Track all connected browser clients
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+
+// Health check
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// Schedules endpoint
+app.get('/schedules', async (req, res) => {
+  try {
+    const forceRefresh = req.query.refresh === 'true';
+    const data = await getSchedules(forceRefresh);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const server = app.listen(PORT, () => {
+  console.log(`[SERVER] Running on http://localhost:${PORT}`);
+});
+
+// WebSocket for AIS
+const wss = new WebSocketServer({ server });
 const clients = new Set();
 
-// Start AIS connection — broadcast every message to all browser clients
-const aisClient = createAISClient((msg) => {
-  const data = JSON.stringify(msg);
-  clients.forEach((client) => {
-    if (client.readyState === 1) client.send(data);
-  });
-});
-
-// When a browser connects to our server
 wss.on('connection', (ws) => {
   clients.add(ws);
-  console.log(`[SERVER] Client connected. Total: ${clients.size}`);
-
+  console.log(`[WS] Client connected. Total: ${clients.size}`);
   ws.on('close', () => {
     clients.delete(ws);
-    console.log(`[SERVER] Client disconnected. Total: ${clients.size}`);
+    console.log(`[WS] Client disconnected. Total: ${clients.size}`);
   });
 });
 
-// Basic health check endpoint
-app.get('/health', (req, res) => res.json({ status: 'ok', clients: clients.size }));
+function broadcast(data) {
+  const msg = JSON.stringify(data);
+  for (const client of clients) {
+    if (client.readyState === 1) client.send(msg);
+  }
+}
 
-server.listen(PORT, () => {
-  console.log(`[SERVER] Running on http://localhost:${PORT}`);
-  aisClient.connect();
-});
+const aisClient = createAISClient((msg) => broadcast(msg));
+aisClient.connect();
+
+// Pre-warm the schedule cache on startup
+getSchedules().catch(err => console.error('[MAERSK] Startup prefetch failed:', err.message));
