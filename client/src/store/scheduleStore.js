@@ -17,17 +17,15 @@ export const useScheduleStore = create((set, get) => ({
   setFilterOperator: (o) => set({ filterOperator: o }),
   setFilterDays: (d) => set({ filterDays: d }),
   selectVessel: (v) => set((s) => ({
-    selectedVessel: s.selectedVessel?.imo === v?.imo &&
-      s.selectedVessel?.voyageNumber === v?.voyageNumber ? null : v
+    selectedVessel: s.selectedVessel?.imo === v?.imo && s.selectedVessel?.voyageNumber === v?.voyageNumber ? null : v
   })),
 
   fetch: async (forceRefresh = false) => {
     set({ loading: true, error: null });
     try {
-      const url = forceRefresh
-        ? 'http://localhost:3001/schedules?refresh=true'
-        : 'http://localhost:3001/schedules';
-      const res = await fetch(url);
+      const base = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const url = `${base}/schedules${forceRefresh ? '?refresh=true' : ''}`;
+      const res = await window.fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       set({
@@ -54,16 +52,10 @@ export const useScheduleStore = create((set, get) => ({
       const etaDate = new Date(eta);
       if (etaDate < now || etaDate > cutoff) return false;
       if (filterTerminal !== 'ALL' && v.facilitySMDGCode !== filterTerminal) return false;
-
-      // Operator filter
       if (filterOperator !== 'ALL') {
-        if (filterOperator === 'OTHER') {
-          if (v.operator) return false;
-        } else {
-          if (v.operator !== filterOperator) return false;
-        }
+        if (filterOperator === 'OTHER' && v.operator) return false;
+        if (filterOperator !== 'OTHER' && v.operator !== filterOperator) return false;
       }
-
       if (q && !v.name?.toLowerCase().includes(q) &&
           !v.serviceName?.toLowerCase().includes(q) &&
           !v.voyageNumber?.toLowerCase().includes(q) &&
