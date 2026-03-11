@@ -10,11 +10,11 @@ const OP_STYLES = {
 };
 
 const TERM_STYLES = {
-  CWIT:  { color: '#6ee7ff', border: 'rgba(110,231,255,0.25)', bg: 'rgba(110,231,255,0.07)' },
-  SAGT:  { color: '#a3f7b5', border: 'rgba(163,247,181,0.25)', bg: 'rgba(163,247,181,0.07)' },
-  CICT:  { color: '#ffd580', border: 'rgba(255,213,128,0.25)', bg: 'rgba(255,213,128,0.07)' },
-  CECT:  { color: '#c4aaff', border: 'rgba(196,170,255,0.25)', bg: 'rgba(196,170,255,0.07)' },
-  LKJCT: { color: '#ffa88a', border: 'rgba(255,168,138,0.25)', bg: 'rgba(255,168,138,0.07)' },
+  CWIT:  { color: '#0077aa', border: 'rgba(0,119,170,0.3)',   bg: 'rgba(0,119,170,0.08)'   },
+  SAGT:  { color: '#007a4d', border: 'rgba(0,122,77,0.3)',    bg: 'rgba(0,122,77,0.08)'    },
+  CICT:  { color: '#6b3fa0', border: 'rgba(107,63,160,0.3)',  bg: 'rgba(107,63,160,0.08)'  },
+  CECT:  { color: '#cc2233', border: 'rgba(204,34,51,0.3)',   bg: 'rgba(204,34,51,0.08)'   },
+  LKJCT: { color: '#b36200', border: 'rgba(179,98,0,0.3)',    bg: 'rgba(179,98,0,0.08)'    },
 };
 
 export default function VesselRow({ vessel, index }) {
@@ -59,7 +59,7 @@ export default function VesselRow({ vessel, index }) {
     >
       {/* Vessel */}
       <td style={{ ...tdBase, padding: '0 0.75rem 0 1rem', minWidth: 195 }}>
-        <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontSize: '0.7rem', fontWeight: 600, color: '#e8f0f8', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180, display: 'block', lineHeight: 1.2 }}>
+        <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontSize: '0.7rem', fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180, display: 'block', lineHeight: 1.2 }}>
           {vessel.name}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
