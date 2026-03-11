@@ -54,7 +54,7 @@ export default function Header() {
           color: 'var(--cyan)', fontSize: '0.75rem', position: 'relative', flexShrink: 0,
         }}>⚓</div>
         <div>
-          <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700, fontSize: '0.85rem', color: '#fff', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+          <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700, fontSize: '0.85rem', color: 'var(--text)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
             PortWatch
           </div>
           <div style={{ fontSize: '0.5rem', color: 'var(--text-dim)', letterSpacing: '0.18em', textTransform: 'uppercase', marginTop: 1 }}>

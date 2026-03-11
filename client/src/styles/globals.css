@@ -1,54 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:         #07090d;
-  --surface:    #0d1117;
-  --panel:      #111820;
-  --border:     #1c2a38;
-  --border-hi:  #253545;
-  --cyan:       #29c4e0;
-  --cyan-dim:   rgba(41,196,224,0.10);
-  --cyan-glow:  rgba(41,196,224,0.04);
-  --green:      #2dd890;
-  --green-dim:  rgba(45,216,144,0.10);
-  --amber:      #f0a500;
-  --amber-dim:  rgba(240,165,0,0.10);
-  --red:        #e84c6a;
-  --red-dim:    rgba(232,76,106,0.10);
-  --purple:     #9b6dff;
-  --purple-dim: rgba(155,109,255,0.10);
-  --text:       #c5d5e4;
-  --text-mid:   #6a8599;
-  --text-dim:   #3d5568;
+  --bg:           #f0f2f5;
+  --surface:      #ffffff;
+  --panel:        #f7f8fa;
+  --border:       #e2e6eb;
+  --border-hi:    #c8d0da;
+  --cyan:         #0077aa;
+  --cyan-dim:     rgba(0,119,170,0.08);
+  --cyan-glow:    rgba(0,119,170,0.15);
+  --green:        #007a4d;
+  --green-dim:    rgba(0,122,77,0.08);
+  --amber:        #b36200;
+  --amber-dim:    rgba(179,98,0,0.08);
+  --red:          #cc2233;
+  --red-dim:      rgba(204,34,51,0.08);
+  --purple:       #6b3fa0;
+  --purple-dim:   rgba(107,63,160,0.08);
+  --text:         #1a2530;
+  --text-mid:     #4a5f72;
+  --text-dim:     #8a9bb0;
 }
 
-html, body { height: 100%; overflow: hidden; }
+html { font-size: 13px; }
 
 body {
   font-family: 'IBM Plex Mono', monospace;
   background: var(--bg);
   color: var(--text);
+  height: 100%;
+  overflow: hidden;
 }
 
-/* scanline overlay */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background: repeating-linear-gradient(
-    0deg, transparent, transparent 2px,
-    rgba(0,0,0,0.025) 2px, rgba(0,0,0,0.025) 4px
-  );
-  pointer-events: none;
-  z-index: 9998;
-}
+html, body { height: 100%; overflow: hidden; }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
 
-@keyframes pulse  { 0%,100%{opacity:1} 50%{opacity:0.3} }
-@keyframes fadeIn { from{opacity:0} to{opacity:1} }
-@keyframes spin   { to { transform: rotate(360deg); } }
-@keyframes critpulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes critpulse { 0%,100%{opacity:1} 50%{opacity:0.4} }  
