@@ -1,4 +1,4 @@
-# ⚓ PortWatch
+# PortWatch
 
 **Vessel Schedule Intelligence for Sri Lanka Ports**
 
