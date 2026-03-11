@@ -6,18 +6,6 @@ A full-stack freight forwarder dashboard providing real-time vessel schedules, c
 
 ---
 
-## Screenshots
-
-> Desktop — Vessel Schedule Table
-
-![PortWatch Desktop](docs/screenshot-desktop.png)
-
-> Mobile — Track & Trace Timeline
-
-![PortWatch Mobile Track](docs/screenshot-mobile-track.png)
-
----
-
 ## Features
 
 - **Live Vessel Schedules** — Aggregates arrival/departure data across all major Colombo terminals (CWIT, SAGT, CICT, LKJCT) and Hambantota (CECT)
