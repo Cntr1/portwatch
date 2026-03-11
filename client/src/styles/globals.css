@@ -30,11 +30,15 @@ body {
   font-family: 'IBM Plex Mono', monospace;
   background: var(--bg);
   color: var(--text);
-  height: 100%;
   overflow: hidden;
 }
 
-html, body { height: 100%; overflow: hidden; }
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+}
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
@@ -43,4 +47,4 @@ html, body { height: 100%; overflow: hidden; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes critpulse { 0%,100%{opacity:1} 50%{opacity:0.4} }  
+@keyframes critpulse { 0%,100%{opacity:1} 50%{opacity:0.4} }

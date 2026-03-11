@@ -8,7 +8,7 @@ export default function MobileLayout() {
   const [activeTab, setActiveTab] = useState('track');
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg)' }}>
+    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg)' }}>
       <MobileHeader />
 
       {/* Content */}
@@ -19,12 +19,13 @@ export default function MobileLayout() {
 
       {/* Bottom tab bar */}
       <div style={{
-        display: 'flex',
-        borderTop: '1px solid var(--border)',
-        background: 'var(--surface)',
-        flexShrink: 0,
-        height: 56,
-      }}>
+      display: 'flex',
+      borderTop: '1px solid var(--border)',
+      background: 'var(--surface)',
+      flexShrink: 0,
+      height: 56,
+      paddingBottom: 'env(safe-area-inset-bottom)',
+    }}>
         {[
           { key: 'track', icon: '📦', label: 'Track' },
           { key: 'schedules', icon: '⚓', label: 'Schedules' },
