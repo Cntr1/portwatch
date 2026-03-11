@@ -93,7 +93,7 @@ export default function EventTimeline({ events }) {
             {/* Event content */}
             <div style={{ paddingBottom: isLast ? 0 : '1.25rem', flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem', marginBottom: 3 }}>
-                <span style={{ fontSize: '0.75rem', color: isActual ? '#fff' : 'var(--text)', fontWeight: isActual ? 700 : 400 }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text)', fontWeight: isActual ? 700 : 400 }}>
                   {EVENT_ICONS[event.eventType]} {getEventDescription(event)}
                 </span>
                 <span style={{
