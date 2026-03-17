@@ -1,0 +1,8 @@
+name = "portwatch-backend"
+main = "src/worker.js"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "565255c0e39e40f1a4972ed4159064d8"
+preview_id = "d00586513640421ab96bd2fc81dfa167"
