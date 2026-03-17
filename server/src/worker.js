@@ -1,9 +1,8 @@
 const BASE = 'https://api.maersk.com/ocean/commercial-schedules/dcsa';
 const PORTS = ['LKCMB'];
 const SCHEDULE_CACHE_KEY = 'schedules_cmb';
-const SCHEDULE_TTL = 3600; // 1 hour
+const SCHEDULE_TTL = 3600;
 
-// ── OAuth (for Track & Trace only) ──────────────────────────────────────────
 const OAUTH_URL = 'https://api.maersk.com/customer-identity/oauth/v2/access_token';
 const TOKEN_CACHE_KEY = 'oauth_token';
 const TOKEN_BUFFER = 60;
@@ -29,7 +28,7 @@ async function getOAuthToken(env) {
     body: body.toString(),
   });
 
-  if (!res.ok) throw new Error(`OAuth failed: ${res.status}`);
+  if (!res.ok) throw new Error('OAuth failed: ' + res.status);
   const data = await res.json();
 
   await env.CACHE.put(TOKEN_CACHE_KEY, JSON.stringify({
@@ -40,10 +39,9 @@ async function getOAuthToken(env) {
   return data.access_token;
 }
 
-// ── Schedules (Consumer-Key only, no OAuth) ──────────────────────────────────
 async function fetchPortSchedule(portCode, env) {
   const date = new Date().toISOString().split('T')[0];
-  const url = `${BASE}/v1/port-schedules?UNLocationCode=${portCode}&date=${date}`;
+  const url = BASE + '/v1/port-schedules?UNLocationCode=' + portCode + '&date=' + date;
 
   const res = await fetch(url, {
     headers: {
@@ -52,7 +50,7 @@ async function fetchPortSchedule(portCode, env) {
     },
   });
 
-  if (!res.ok) throw new Error(`Maersk API error: ${res.status} ${await res.text()}`);
+  if (!res.ok) throw new Error('Maersk API error: ' + res.status + ' ' + await res.text());
   return res.json();
 }
 
@@ -60,20 +58,24 @@ function parseSchedules(raw, portCode) {
   const vessels = [];
 
   for (const terminal of raw) {
-    const terminalName = terminal.location?.locationName || portCode;
-    const facilitySMDGCode = terminal.location?.facilitySMDGCode || '';
+    const terminalName = terminal.location && terminal.location.locationName ? terminal.location.locationName : portCode;
+    const facilitySMDGCode = terminal.location && terminal.location.facilitySMDGCode ? terminal.location.facilitySMDGCode : '';
 
     for (const vs of (terminal.vesselSchedules || [])) {
       const vessel = vs.vessel || {};
-      const service = vs.servicePartners?.[0] || {};
+      const service = vs.servicePartners && vs.servicePartners[0] ? vs.servicePartners[0] : {};
       const timestamps = vs.timestamps || [];
       const cutoffs = vs.cutOffTimes || [];
 
-      const getTime = (typeCode, classifierCode) =>
-        timestamps.find(t => t.eventTypeCode === typeCode && t.eventClassifierCode === classifierCode)?.eventDateTime || null;
+      const getTime = (typeCode, classifierCode) => {
+        const t = timestamps.find(t => t.eventTypeCode === typeCode && t.eventClassifierCode === classifierCode);
+        return t ? t.eventDateTime : null;
+      };
 
-      const getCutoff = (code) =>
-        cutoffs.find(c => c.cutOffDateTimeCode === code)?.cutOffDateTime || null;
+      const getCutoff = (code) => {
+        const c = cutoffs.find(c => c.cutOffDateTimeCode === code);
+        return c ? c.cutOffDateTime : null;
+      };
 
       vessels.push({
         imo: vessel.vesselIMONumber,
@@ -111,11 +113,9 @@ function parseSchedules(raw, portCode) {
 }
 
 async function getSchedules(env) {
-  // Check KV cache
   const cached = await env.CACHE.get(SCHEDULE_CACHE_KEY, 'json');
-  if (cached) return { ...cached, fromCache: true };
+  if (cached) return Object.assign({}, cached, { fromCache: true });
 
-  // Fetch fresh
   const results = await Promise.all(PORTS.map(p => fetchPortSchedule(p, env)));
   const vessels = results.flatMap((raw, i) => parseSchedules(raw, PORTS[i]));
 
@@ -129,29 +129,34 @@ async function getSchedules(env) {
     expirationTtl: SCHEDULE_TTL,
   });
 
-  return { ...data, fromCache: false };
+  return Object.assign({}, data, { fromCache: false });
 }
 
-// ── Track & Trace (OAuth required) ──────────────────────────────────────────
-async function fetchTrackEvents(env, queryType, queryValue) {
+async function fetchTrackEvents(env, carrierBookingReference, transportDocumentReference, equipmentReference) {
   const token = await getOAuthToken(env);
-  const params = new URLSearchParams({ [queryType]: queryValue });
+
+  const params = new URLSearchParams();
+  if (carrierBookingReference)    params.set('carrierBookingReference',    carrierBookingReference);
+  if (transportDocumentReference) params.set('transportDocumentReference', transportDocumentReference);
+  if (equipmentReference)         params.set('equipmentReference',         equipmentReference);
+  params.set('limit', '100');
+  params.set('sort', 'eventDateTime:ASC');
 
   const res = await fetch(
-    `https://api.maersk.com/track-and-trace-private/events?${params}`,
+    'https://api.maersk.com/track-and-trace-private/events?' + params,
     {
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Consumer-Key': env.MAERSK_CONSUMER_KEY,
+        'Authorization': 'Bearer ' + token,
+        'Consumer-Key':  env.MAERSK_CONSUMER_KEY,
+        'Accept':        'application/json',
       },
     }
   );
 
-  if (!res.ok) throw new Error(`Track fetch failed: ${res.status} — ${await res.text()}`);
+  if (!res.ok) throw new Error('Track fetch failed: ' + res.status + ' — ' + await res.text());
   return res.json();
 }
 
-// ── CORS helper ──────────────────────────────────────────────────────────────
 function cors(response) {
   const headers = new Headers(response.headers);
   headers.set('Access-Control-Allow-Origin', '*');
@@ -160,14 +165,13 @@ function cors(response) {
   return new Response(response.body, { status: response.status, headers });
 }
 
-function json(data, status = 200) {
+function json(data, status) {
   return new Response(JSON.stringify(data), {
-    status,
+    status: status || 200,
     headers: { 'Content-Type': 'application/json' },
   });
 }
 
-// ── Router ───────────────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -183,12 +187,15 @@ export default {
       }
 
       if (url.pathname === '/track' && request.method === 'GET') {
-        const queryType = url.searchParams.get('queryType');
-        const queryValue = url.searchParams.get('queryValue');
-        if (!queryType || !queryValue) {
-          return cors(json({ error: 'Missing queryType or queryValue' }, 400));
+        const carrierBookingReference    = url.searchParams.get('carrierBookingReference');
+        const transportDocumentReference = url.searchParams.get('transportDocumentReference');
+        const equipmentReference         = url.searchParams.get('equipmentReference');
+
+        if (!carrierBookingReference && !transportDocumentReference && !equipmentReference) {
+          return cors(json({ error: 'Provide at least one of: carrierBookingReference, transportDocumentReference, or equipmentReference' }, 400));
         }
-        const data = await fetchTrackEvents(env, queryType, queryValue);
+
+        const data = await fetchTrackEvents(env, carrierBookingReference, transportDocumentReference, equipmentReference);
         return cors(json(data));
       }
 
